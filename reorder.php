@@ -4,6 +4,10 @@
 // - Works without DB (uses session-stored last order + ?demo=1)
 // - Posts items into $_SESSION['cart'] and redirects to /store/?reordered=1
 
+require_once __DIR__ . '/config.php';   // add this
+// your existing PHP (hours, $recommended_items, etc.) can stay
+
+
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
 date_default_timezone_set('Europe/London');
 
@@ -237,13 +241,7 @@ $lastOrder = $_SESSION['last_order'] ?? null;
   });
 </script>
 
-<!-- Bottom nav (kept) -->
-<div class="bottom-nav">
-  <div class="nav-item"><i class="fas fa-utensils"></i>Order Now</div>
-  <div class="nav-item"><i class="fas fa-info-circle"></i>About</div>
-  <div class="nav-item active"><i class="fas fa-history"></i>Reorder</div>
-  <div class="nav-item"><i class="fas fa-ellipsis-h"></i>More</div>
-</div>
+<?php include __DIR__ . '/partials/bottom-nav.php'; ?>
 
 </body>
 </html>
