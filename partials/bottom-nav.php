@@ -1,59 +1,96 @@
 <?php
 // partials/bottom-nav.php
+// NOTE: Do NOT start sessions or include config here.
+// Start the session at the very top of entry pages (index.php, about.php, etc)
+// via: require_once __DIR__ . '/config.php';
 
-// Ensure config is loaded even if the page forgot to include it
-if (!defined('BASE_URL') || !defined('ADMIN_PATH')) {
-  $configPath = dirname(__DIR__) . '/config.php'; // one level up from /partials
-  if (file_exists($configPath)) {
-    require_once $configPath;
-  }
+if (!defined('BASE_URL')) {
+  // Safe fallback; your entry pages should define this in config.php
+  define('BASE_URL', 'https://lbdigitalworks.com/websites/shop/');
 }
 
-// Safe fallbacks
-if (!defined('BASE_URL'))  define('BASE_URL', 'https://lbdigitalworks.com/websites/shop/'); // keep trailing slash
-if (!defined('ADMIN_PATH')) define('ADMIN_PATH', 'Admin_CP/'); // change if your admin folder name differs
+// Decide where "Account" should go.
+$sessionActive = (session_status() === PHP_SESSION_ACTIVE);
+$loggedIn = $sessionActive && !empty($_SESSION['user']);
+
+$accountTarget = defined('ACCOUNT_PAGE')
+  ? ACCOUNT_PAGE
+  : ($loggedIn ? 'account.php' : 'auth.php');
 
 // Active tab detection
-$script    = basename($_SERVER['SCRIPT_NAME'] ?? '');
-$uri       = $_SERVER['REQUEST_URI'] ?? '';
-$adminSlug = trim(ADMIN_PATH, '/');
+$script = basename($_SERVER['SCRIPT_NAME'] ?? '');
+$uri    = $_SERVER['REQUEST_URI'] ?? '';
 
 $isIndex   = ($script === 'index.php');
 $isAbout   = ($script === 'about.php');
 $isReorder = ($script === 'reorder.php');
-$isAdmin   = ($adminSlug && strpos($uri, '/' . $adminSlug) !== false);
+$isAccount = ($script === basename($accountTarget))
+          || strpos($uri, '/account') !== false
+          || strpos($uri, '/auth') !== false;
 ?>
 <style>
-  .bottom-nav {
-    position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #ccc;
-    display: flex; justify-content: space-around; align-items: center; padding: 10px 0; z-index: 9999; height: 40px;
-    box-shadow: 0 -1px 4px rgba(0,0,0,0.05);
+  .bottom-nav{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    background:var(--card,#fff);   /* use theme variable instead of hard white */
+    border-top:1px solid var(--line,#ccc);
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    padding:10px 0;
+    z-index:9999;
+    height:56px;
+    box-shadow:0 -1px 4px rgba(0,0,0,.05);
   }
-  .bottom-nav .nav-item {
-    text-decoration: none; color: #333; display: block; text-align: center; font-size: 12px;
+  .bottom-nav .nav-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    color:var(--text,#333);
+    font-size:12px;
+    flex:1;
+    height:100%;
   }
-  .bottom-nav .nav-item i { display: block; font-size: 18px; margin-bottom: 4px; }
-  .bottom-nav .nav-item.active { color: #f04f32; font-weight: 600; }
+  .bottom-nav .nav-item i{
+    display:block;
+    font-size:18px;
+    margin-bottom:4px;
+  }
+  .bottom-nav .nav-item.active{
+    color:var(--primary,#f04f32);
+    font-weight:600;
+  }
+
+  /* === OVERRIDES: ensure nav sits above backdrops but keep theme colors === */
+  .bottom-nav{
+    z-index:10020 !important;   /* higher than backdrops/sheets */
+    isolation:isolate;          /* block blending from overlays */
+  }
+  .bottom-nav::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:inherit;          /* inherit var(--card) color (light OR dark) */
+    z-index:-1;
+  }
 </style>
 
+
 <div class="bottom-nav">
-  <!-- Order Now (jumps to menu on index) -->
   <a class="nav-item <?= $isIndex ? 'active' : '' ?>" href="<?= BASE_URL ?>index.php">
     <i class="fas fa-utensils"></i>Order Now
   </a>
-
-  <!-- About page -->
   <a class="nav-item <?= $isAbout ? 'active' : '' ?>" href="<?= BASE_URL ?>about.php">
     <i class="fas fa-info-circle"></i>About
   </a>
-
-  <!-- Reorder page -->
   <a class="nav-item <?= $isReorder ? 'active' : '' ?>" href="<?= BASE_URL ?>reorder.php">
     <i class="fas fa-history"></i>Reorder
   </a>
-
-  <!-- Admin area -->
-  <a class="nav-item <?= $isAdmin ? 'active' : '' ?>" href="<?= BASE_URL . ADMIN_PATH ?>">
-    <i class="fas fa-ellipsis-h"></i>More
+  <a class="nav-item <?= $isAccount ? 'active' : '' ?>" href="<?= BASE_URL . $accountTarget ?>">
+    <i class="fas fa-user"></i>Account
   </a>
 </div>

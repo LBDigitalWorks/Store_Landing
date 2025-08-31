@@ -1,0 +1,2 @@
+[29-Aug-2025 04:47:06 Europe/London] PHP Warning:  session_set_cookie_params(): Session cookie parameters cannot be changed when a session is active in /home/lbdigita/public_html/websites/shop/admin/login.php on line 6
+[29-Aug-2025 04:48:56 Europe/London] PHP Warning:  session_set_cookie_params(): Session cookie parameters cannot be changed when a session is active in /home/lbdigita/public_html/websites/shop/admin/login.php on line 6
